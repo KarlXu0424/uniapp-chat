@@ -1,0 +1,76 @@
+{
+    "pages": [ //pages数组中第一项表示应用启动页,
+        {
+            "path": "pages/login/login",
+            "style": {}
+        },
+		{
+            "path": "pages/login/forget",
+            "style": {}
+        },
+		{
+            "path": "pages/login/register",
+            "style": {}
+        },
+		{
+            "path" : "pages/chat/history",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        },
+		{
+            "path" : "pages/user/friend",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        },
+		{
+            "path" : "pages/user/my",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+    ],
+    "globalStyle": {
+    	"navigationBarTextStyle": "black",
+    	"navigationBarTitleText": "laravel-im",
+    	"navigationBarBackgroundColor": "#F8F8F8",
+    	"backgroundColor": "#F8F8F8",
+    	"navigationStyle": "default"
+    },
+	"tabBar":{
+		"color":"#333",
+		"selectedColor":"#08640d",
+		"backgroundColor":"#eee",
+		"borderStyle":"black",
+		"list":[
+			{
+				"pagePath":"pages/chat/history",
+				"text":"消息",
+				"iconPath":"./static/tabbar/history.png",
+				"selectedIconPath":"static/tabbar/history_select.png"
+			},
+			{
+				"pagePath":"pages/user/friend",
+				"text":"好友",
+				"iconPath":"static/tabbar/friend.png",
+				"selectedIconPath":"static/tabbar/friend_select.png"
+			},
+			{
+				"pagePath":"pages/user/my",
+				"text":"我的",
+				"iconPath":"static/tabbar/my.png",
+				"selectedIconPath":"./static/tabbar/my_select.png"
+			}
+		]
+	}
+}
