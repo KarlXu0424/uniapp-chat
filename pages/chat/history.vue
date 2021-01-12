@@ -1,24 +1,24 @@
 <template>
 	<view>
-			<view class="list">
-				<view class="flex_col" @longpress="onLongPress" :class="{'active':pickerUserIndex==index}" @tap="listTap" v-for="(item,index) in userList"
-				 :key="index" :data-index="index">
-					<image src="../../static/logo.png" mode="aspectFill"></image>
-					<view class="flex_grow">
-						<view class="flex_col">
-							<view class="flex_grow">{{item.name}}</view>
-							<view class="time">{{item.time}}</view>
-						</view>
-						<view class="info">{{item.info}}</view>
+		<view class="list">
+			<view class="flex_col" @longpress="onLongPress" :class="{'active':pickerUserIndex==index}" @click="pickChat(1, item.friend_user_id, item.name)"
+			 v-for="(item,index) in userList" :key="item.friend_user_id" :data-index="index">
+				<image src="../../static/logo.png" mode="aspectFill"></image>
+				<view class="flex_grow">
+					<view class="flex_col">
+						<view class="flex_grow">{{item.name}}</view>
+						<view class="time">{{item.time}}</view>
 					</view>
-				</view>
-			</view>
-			<view class="shade" v-show="showShade" @tap="hidePop">
-				<view class="pop" :style="popStyle" :class="{'show':showPop}">
-					<view v-for="(item,index) in popButton" :key="index" @tap="pickerMenu" :data-index="index">{{item}}</view>
+					<view class="info">{{item.info}}</view>
 				</view>
 			</view>
 		</view>
+		<view class="shade" v-show="showShade" @tap="hidePop">
+			<view class="pop" :style="popStyle" :class="{'show':showPop}">
+				<view v-for="(item,index) in popButton" :key="index" @tap="pickerMenu" :data-index="index">{{item}}</view>
+			</view>
+		</view>
+	</view>
 </template>
 
 <script>
@@ -41,6 +41,10 @@
 			}
 		},
 		onLoad() {
+			getApp().checkLogin();
+			uni.setNavigationBarTitle({
+				title: '消息'
+			})
 			this.getListData();
 			this.getWindowSize();
 
@@ -58,20 +62,32 @@
 				if (this.showShade) {
 					return;
 				}
-
 				console.log("列表触摸事件触发")
 			},
 			/* 获取列表数据 */
 			getListData() {
-				let list = [];
-				for (let i = 0; i < 20; i++) {
-					list.push({
-						"name": `第${i+1}个用户`,
-						"time": '5月20日',
-						"info": `这是第${i+1}个用户的聊天信息`
-					})
-				}
-				this.userList = list;
+				uni.request({
+					url: 'http://chat.cc/api/user/getFriend',
+					data: {
+						token: localStorage.getItem('token'),
+					},
+					method: 'POST',
+					header: {
+						'content-type': 'application/x-www-form-urlencoded' // post 请求
+					},
+					success: (res) => {
+						console.log(res.data);
+						if (res.data.code == 1001) {
+							uni.showToast({
+								icon: 'none',
+								position: 'bottom',
+								title: res.data.message
+							});
+							return;
+						}
+						this.userList = res.data.data;
+					}
+				})
 			},
 			/* 获取窗口尺寸 */
 			getWindowSize() {
@@ -135,13 +151,21 @@
 				 如果行的菜单方法存在异步情况，请在隐藏之前将该值保存，或通过参数传入异步函数中
 				 */
 				this.hidePop();
+			},
+			pickChat(type, firend_user_id, name) {
+				localStorage.setItem('chat_type', type);
+				localStorage.setItem('chat_id', firend_user_id);
+				localStorage.setItem('chat_name', name);
+				uni.reLaunch({
+					url: '../chat/chat',
+				});
 			}
 		}
 	}
 </script>
 
 <style scoped lang="scss">
-/* 列式弹性盒子 */
+	/* 列式弹性盒子 */
 	.flex_col {
 		display: flex;
 		flex-direction: row;
@@ -229,7 +253,8 @@
 				position: absolute;
 				top: -1px;
 				right: 0;
-				transform:scaleY(0.5);	/* 1px像素 */
+				transform: scaleY(0.5);
+				/* 1px像素 */
 			}
 		}
 	}
