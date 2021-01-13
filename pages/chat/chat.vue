@@ -1,14 +1,8 @@
 <template>
 	<view>
 		<view class="message pre-scrollable" style="height: 600px;overflow:auto;" id="message">
-			<view style="overflow:hidden;" v-for="message in messages" :key='index'>
-				<view :class="message.user_id === uuid ? 'float-right' : ''" v-if="friend_user_id === message.user_id">
-					<view class="content">{{ message.name }} ： {{ message.content }}</view>
-					<view class="time">
-						<p>{{ message.time }}</p>
-					</view>
-				</view>
-				<view :class="message.user_id === uuid ? 'float-right' : ''" v-else-if="uuid === message.user_id && friend_user_id === message.friend_id">
+			<view style="overflow:hidden;" v-for="(message, index) in messages" :key="index">
+				<view :class="message.user_id === user_id ? 'float-right' : ''">
 					<view class="content">{{ message.name }} ： {{ message.content }}</view>
 					<view class="time">
 						<p>{{ message.time }}</p>
@@ -29,6 +23,7 @@
 </template>
 
 <script>
+	import IndexedDB from 'static/js/indexedDB.js'
 	export default {
 		data() {
 			return {
@@ -36,6 +31,7 @@
 				messages: [],
 				sendMessage: null,
 				friend_user_id: null,
+				user_id: null,
 				title: null,
 			}
 		},
@@ -43,13 +39,14 @@
 			getApp().checkLogin();
 			this.title = localStorage.getItem('chat_name');
 			this.friend_user_id = localStorage.getItem('chat_id');
+			this.user_id = localStorage.getItem('user_id');
 			uni.setNavigationBarTitle({
 				title: this.title
 			})
+			// this.getMessages();
 		},
 		methods: {
 			sendForFriend: function() {
-
 				let content = this.sendMessage;
 				console.log(content);
 				if (content == null) {
@@ -73,8 +70,32 @@
 					'content': content,
 				};
 				getApp().sendSocketMessage(JSON.stringify(this.postData));
+				this.db = new IndexedDB('chat', 1);
+				this.db.open({
+					name: 'test',
+					options: {
+						autoIncrement: true,
+						keyPath: 'id'
+					},
+				});
+				this.db.add({
+					name: 'data.from_user_name',
+					user_id: 'data.from_user_id',
+					friend_id: 'data.to_friend_user_id',
+					content: 'data.content',
+					time: 'data.time',
+				}, 'test');
 				this.sendMessage = null;
 			},
+			getMessages: function() {
+				let messages = getApp().globalData.messages;
+				let chat_id = localStorage.getItem('chat_id');
+				if (messages[chat_id] != null) {
+					this.messages = messages[chat_id];
+				} else {
+					this.messages = [];
+				}
+			}
 		}
 	}
 </script>

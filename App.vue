@@ -1,10 +1,8 @@
 <script>
 	import Vue from 'vue'
+	import IndexedDB from 'static/js/indexedDB.js'
 
 	export default {
-		globalData: {
-			messages: {}
-		},
 		created() {
 			// #ifdef APP-PLUS
 			plus.navigator.closeSplashscreen();
@@ -25,12 +23,12 @@
 				});
 			});
 			uni.onSocketMessage(function(res) {
-				getApp().getMessage(res.data);
+				// getApp().getMessage(res.data);
 			});
 		},
 		onLaunch: function() {
 
-			console.log('App Launch')
+			// console.log('App Launch')
 			uni.getSystemInfo({
 				success: function(e) {
 					// #ifndef MP
@@ -57,10 +55,10 @@
 			})
 		},
 		onShow: function() {
-			console.log('App 开启')
+			// console.log('App 开启')
 		},
 		onHide: function() {
-			console.log('App 关闭')
+			// console.log('App 关闭')
 		},
 		methods: {
 			isLogin() {
@@ -89,7 +87,7 @@
 			getMessage(msg) {
 				console.log(msg);
 				let data = JSON.parse(msg);
-				let messages = getApp().globalData.messages;
+				let user_id = localStorage.getItem('user_id');
 				if (data.code !== 1000) {
 					uni.showToast({
 						icon: 'none',
@@ -102,17 +100,37 @@
 						break;
 					case "send":
 						if (data.send_type === 'friend') {
-							if (messages[data.from_user_id] == null) {
-								messages[data.from_user_id] = [];
+							let table = null;
+							// 自己发送的消息
+							if (data.from_user_id == user_id) {
+								table = data.from_user_id;
+								this.db.open({
+									name: data.from_user_id,
+									options: {
+										autoIncrement: true,
+										keyPath: 'id'
+									},
+								});
+
+							} else { // 好友发送的消息
+								table = data.to_friend_user_id;
+								this.db.open({
+									name: data.to_friend_user_id,
+									options: {
+										autoIncrement: true,
+										keyPath: 'id'
+									},
+								});
 							}
-							messages[data.from_user_id].push({
+							this.db.add({
 								name: data.from_user_name,
 								user_id: data.from_user_id,
 								friend_id: data.to_friend_user_id,
 								content: data.content,
 								time: data.time,
-							});
-							console.log(messages);
+							}, table);
+							console.log(1111111111111111);
+							console.log(table);
 						}
 						break;
 				}

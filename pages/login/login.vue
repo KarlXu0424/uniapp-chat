@@ -105,9 +105,10 @@
 							return;
 						}
 						localStorage.setItem('is_login', true);
-						localStorage.setItem('uuid', res.data.data.uuid);
-						localStorage.setItem('name', res.data.data.name);
 						localStorage.setItem('token', res.data.data.token);
+						localStorage.setItem('user_id', res.data.data.user_id);
+						localStorage.setItem('name', res.data.data.name);
+						localStorage.setItem('avatar', res.data.data.avatar);
 						// 发送消息
 						this.postData = {
 							'token': localStorage.getItem('token'),
